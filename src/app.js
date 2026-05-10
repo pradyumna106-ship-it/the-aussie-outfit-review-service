@@ -10,15 +10,13 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   credentials: true}));
-app.options('/api', cors());
+app.options('', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // for form
 app.use("/uploads", express.static("uploads"));
-app.get('/', (req, res) => {
-  res.status(200).json({ message: "API Connected Successfully" })
-})
+
 app.use(express.json());
-app.use("/api/reviews", rewviewRouter);
-app.use("/api/ratings",ratingRouter);
+app.use("/", rewviewRouter);
+app.use("/ratings",ratingRouter);
 
 export default app;
