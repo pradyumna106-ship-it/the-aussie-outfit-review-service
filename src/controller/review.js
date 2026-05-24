@@ -1,7 +1,9 @@
 // controllers/review.controller.js
 
+import mongoose from "mongoose";
+import Rating from "../models/rating.js";
 import Review from "../models/review.js";
-
+import { getDatabaseConnection } from "../config/database.js"
 
 // =====================================
 // CREATE REVIEW
@@ -9,7 +11,12 @@ import Review from "../models/review.js";
 // =====================================
 export const createReview = async (req, res) => {
   try {
-
+    const {
+      productId,
+      userId,
+      title,
+      comment
+    } = req.body
     const review = await Review.create(req.body);
 
     return res.status(201).json({
@@ -28,18 +35,46 @@ export const createReview = async (req, res) => {
 };
 
 export const getAllReviews = async (req, res) => {
+
   try {
-    const reviews = await Review.find()
-      .sort({ createdAt: -1 });
+    const userDb = await getDatabaseConnection({
+      name: "user-service",
+      uri: process.env.MONGODB_URI+`/user-service`
+    })
+    const reviews = await Review.aggregate([
+
+      {
+        $lookup: {
+          from: "ratings",
+          localField: "_id",
+          foreignField: "reviewId",
+          as: "ratings"
+        }
+      },
+
+      {
+        $sort: {
+          createdAt: -1
+        }
+      }
+
+    ]);
 
     return res.status(200).json({
+
       success: true,
+
       count: reviews.length,
+
       data: reviews
     });
+
   } catch (error) {
+
     return res.status(500).json({
+
       success: false,
+
       message: error.message
     });
   }
@@ -53,15 +88,38 @@ export const getReviewsByProductId = async (req, res) => {
 
     const { productId } = req.params;
 
-    const reviews = await Review.find({
-      productId,
-      isActive: true
-    })
-      .sort({ createdAt: -1 });
+    const reviews = await Review.aggregate([
+
+      {
+        $match: {
+          productId: new mongoose.Types.ObjectId(productId),
+          isActive: true
+        }
+      },
+
+      {
+        $lookup: {
+          from: "ratings",
+          localField: "_id",
+          foreignField: "reviewId",
+          as: "ratings"
+        }
+      },
+
+      {
+        $sort: {
+          createdAt: -1
+        }
+      }
+
+    ]);
 
     return res.status(200).json({
+
       success: true,
+
       count: reviews.length,
+
       data: reviews
     });
 
