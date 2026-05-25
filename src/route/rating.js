@@ -27,7 +27,7 @@ router.get(
 
 // DELETE RATING
 router.delete(
-  "/:ratingId",
+  "/:reviewId",
   deleteRating
 );
 

@@ -13,12 +13,20 @@ export const createOrUpdateRating = async (req, res) => {
     const {
       productId,
       userId,
-      rating
+      rating,
+      reviewId
     } = req.body;
-
+    if (!productId || !userId || !rating || !reviewId) {
+      return res.status(404).json({
+        success: false,
+        message: "request body sent one of the missing values",
+        data: {productId, userId, rating, reviewId}
+      })
+    }
     let existingRating = await Rating.findOne({
       productId,
-      userId
+      userId,
+      reviewId
     });
 
     // UPDATE EXISTING RATING
@@ -39,7 +47,8 @@ export const createOrUpdateRating = async (req, res) => {
     const newRating = await Rating.create({
       productId,
       userId,
-      rating
+      rating,
+      reviewId
     });
 
     return res.status(201).json({
@@ -109,11 +118,11 @@ export const getRatingsByProductId = async (req, res) => {
 export const deleteRating = async (req, res) => {
   try {
 
-    const { ratingId } = req.params;
+    const { reviewId } = req.params;
 
     const deletedRating =
-      await Rating.findByIdAndDelete(
-        ratingId
+      await Rating.findOneAndDelete(
+        reviewId
       );
 
     if (!deletedRating) {

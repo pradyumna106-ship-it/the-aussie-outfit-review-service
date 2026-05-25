@@ -1,27 +1,49 @@
 // controllers/review.controller.js
 
-import mongoose from "mongoose";
 import Rating from "../models/rating.js";
 import Review from "../models/review.js";
-import { getDatabaseConnection } from "../config/database.js"
-
+import mongoose from "mongoose"
 // =====================================
 // CREATE REVIEW
 // POST /reviews
 // =====================================
 export const createReview = async (req, res) => {
+
   try {
+
     const {
       productId,
       userId,
       title,
       comment
-    } = req.body
-    const review = await Review.create(req.body);
+    } = req.body;
+
+    if (
+      !productId ||
+      !userId ||
+      !title ||
+      !comment
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "one of the required value is missing",
+        data: {
+          productId,
+          userId,
+          title,
+          comment
+        }
+      });
+    }
+
+    const review =
+      await Review.create(req.body);
 
     return res.status(201).json({
       success: true,
-      message: "Review created successfully",
+      message:
+        "Review created successfully",
       data: review
     });
 
@@ -34,31 +56,55 @@ export const createReview = async (req, res) => {
   }
 };
 
-export const getAllReviews = async (req, res) => {
+export const getAllReviews = async (
+  req,
+  res
+) => {
 
   try {
-    const userDb = await getDatabaseConnection({
-      name: "user-service",
-      uri: process.env.MONGODB_URI+`/user-service`
-    })
-    const reviews = await Review.aggregate([
 
-      {
-        $lookup: {
-          from: "ratings",
-          localField: "_id",
-          foreignField: "reviewId",
-          as: "ratings"
+    const reviews =
+      await Review.aggregate([
+
+        {
+          $lookup: {
+            from: "ratings",
+            localField: "_id",
+            foreignField: "reviewId",
+            as: "ratings"
+          }
+        },
+
+        {
+          $addFields: {
+
+            rating: {
+              $ifNull: [
+                {
+                  $arrayElemAt: [
+                    "$ratings.rating",
+                    0
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+
+        {
+          $project: {
+            ratings: 0
+          }
+        },
+
+        {
+          $sort: {
+            createdAt: -1
+          }
         }
-      },
 
-      {
-        $sort: {
-          createdAt: -1
-        }
-      }
-
-    ]);
+      ]);
 
     return res.status(200).json({
 
@@ -75,7 +121,10 @@ export const getAllReviews = async (req, res) => {
 
       success: false,
 
-      message: error.message
+      message: {
+        error: error?.message,
+        body: req?.body
+      }
     });
   }
 };
@@ -98,13 +147,36 @@ export const getReviewsByProductId = async (req, res) => {
       },
 
       {
-        $lookup: {
-          from: "ratings",
-          localField: "_id",
-          foreignField: "reviewId",
-          as: "ratings"
-        }
-      },
+          $lookup: {
+            from: "ratings",
+            localField: "_id",
+            foreignField: "reviewId",
+            as: "ratings"
+          }
+        },
+
+        {
+          $addFields: {
+
+            rating: {
+              $ifNull: [
+                {
+                  $arrayElemAt: [
+                    "$ratings.rating",
+                    0
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+
+        {
+          $project: {
+            ratings: 0
+          }
+        },
 
       {
         $sort: {

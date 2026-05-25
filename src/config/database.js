@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv/config"
 import { DB_NAME } from "./constant.js";
 
 const connectionCache = new Map();

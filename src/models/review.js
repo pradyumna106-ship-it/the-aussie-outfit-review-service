@@ -18,12 +18,6 @@ const reviewSchema = new mongoose.Schema(
       index: true
     },
 
-    orderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
-      default: null
-    },
-
     title: {
       type: String,
       trim: true,

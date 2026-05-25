@@ -14,9 +14,9 @@ const router = express.Router();
 
 
 // CREATE REVIEW
-router.post("/", createReview);
-
-router.get("/", getAllReviews);
+router.route("/")
+  .post(createReview)
+  .get(getAllReviews);
 
 // GET REVIEWS BY PRODUCT ID
 router.get("/product/:productId", getReviewsByProductId);
