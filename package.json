@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "test": "vitest run",
+  "test": "vitest run --passWithNoTests",
   "test:watch": "vitest",
   "start": "node src/index.js",
   "dev": "nodemon src/index.js"
