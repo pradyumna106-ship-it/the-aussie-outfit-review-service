@@ -18,6 +18,9 @@
     "multer": "^2.1.1",
     "nodemon": "^3.1.14"
   },
+  "devDependencies": {
+    "vitest": "^4.1.4"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pradyumna106-ship-it/the-aussie-outfit-review-service.git"
